@@ -1,226 +1,183 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
+import styles from "./page.module.css";
+
+type FormState = "idle" | "submitting" | "fading" | "success";
 
 export default function Home() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [submitted, setSubmitted] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
+  const [formState, setFormState] = useState<FormState>("idle");
   const [error, setError] = useState("");
+  const [shake, setShake] = useState(false);
+
+  const nameRef = useRef<HTMLInputElement>(null);
+  const emailRef = useRef<HTMLInputElement>(null);
+
+  function triggerShake() {
+    setShake(true);
+    setTimeout(() => setShake(false), 400);
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!name || !email || submitting) return;
 
-    setSubmitting(true);
+    const trimmedName = name.trim();
+    const trimmedEmail = email.trim();
+
+    // Client-side validation
+    if (
+      !trimmedName ||
+      !trimmedEmail ||
+      !trimmedEmail.includes("@") ||
+      !trimmedEmail.includes(".")
+    ) {
+      setError("please fill in your name and email");
+      triggerShake();
+      if (!trimmedName) {
+        nameRef.current?.focus();
+      } else {
+        emailRef.current?.focus();
+      }
+      return;
+    }
+
+    setFormState("submitting");
     setError("");
 
     try {
       const res = await fetch("/api/waitlist", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: name.trim(), email: email.trim() }),
+        body: JSON.stringify({ name: trimmedName, email: trimmedEmail }),
       });
 
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.error || "Something went wrong.");
+        setFormState("idle");
+        setError(data.error || "something went wrong");
+        return;
       }
 
-      setSubmitted(true);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong.");
-    } finally {
-      setSubmitting(false);
+      // Success: wait 400ms → fade out → replace with success state after 350ms
+      setTimeout(() => {
+        setFormState("fading");
+        setTimeout(() => setFormState("success"), 350);
+      }, 400);
+    } catch {
+      setFormState("idle");
+      setError("something went wrong");
     }
   }
 
-  const inputStyle: React.CSSProperties = {
-    width: "100%",
-    padding: "12px 16px",
-    fontFamily: "var(--font-body), sans-serif",
-    fontSize: 15,
-    color: "var(--ink)",
-    background: "var(--bg)",
-    border: `var(--hairline-weight) solid var(--hairline)`,
-    borderRadius: "var(--radius)",
-    outline: "none",
-    boxSizing: "border-box",
-    WebkitAppearance: "none",
-  };
+  const isSubmitting = formState === "submitting";
+  const isFading = formState === "fading";
+  const isSuccess = formState === "success";
 
   return (
-    <main
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        minHeight: "100svh",
-        padding: "var(--margin)",
-        boxSizing: "border-box",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          maxWidth: 480,
-          width: "100%",
-          gap: 40,
-        }}
-      >
-        {/* Wordmark */}
-        <h1
-          style={{
-            fontFamily: "var(--font-mono), monospace",
-            fontWeight: 500,
-            fontSize: 28,
-            letterSpacing: "0.06em",
-            color: "var(--ink)",
-            margin: 0,
-          }}
-        >
-          Keeped
-        </h1>
+    <>
+      <div className={styles.background} aria-hidden="true" />
 
-        {/* Tagline + brand statement */}
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: 16,
-          }}
-        >
-          <p
-            style={{
-              fontFamily: "var(--font-body), sans-serif",
-              fontStyle: "italic",
-              fontSize: 18,
-              lineHeight: 1.5,
-              color: "var(--ink)",
-              margin: 0,
-              textAlign: "center",
-            }}
-          >
-            Some things deserve to be kept.
-          </p>
+      <div className={styles.page}>
+        <div className={styles.card}>
 
-          <p
-            style={{
-              fontFamily: "var(--font-body), sans-serif",
-              fontSize: 14,
-              lineHeight: 1.6,
-              color: "var(--ink-2)",
-              margin: 0,
-              textAlign: "center",
-              letterSpacing: "0.01em",
-            }}
-          >
-            the private version of being known
-          </p>
-        </div>
+          {/* Header */}
+          <header className={styles.header}>
+            <span className={styles.headerLeft}>KEEPED</span>
+            <span className={styles.headerCenter}>ref. 001 — march 2026</span>
+            <span className={styles.headerRight}>WAITLIST</span>
+          </header>
 
-        {/* Form or confirmation */}
-        {submitted ? (
-          <p
-            style={{
-              fontFamily: "var(--font-body), sans-serif",
-              fontSize: 16,
-              color: "var(--ink)",
-              margin: 0,
-              animation: "fadeIn 0.6s ease",
-            }}
-          >
-            Your place is kept.
-          </p>
-        ) : (
-          <form
-            onSubmit={handleSubmit}
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "stretch",
-              gap: 12,
-              width: "100%",
-              maxWidth: 320,
-            }}
-          >
-            <input
-              type="text"
-              name="name"
-              required
-              autoComplete="given-name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="your name"
-              style={inputStyle}
-            />
+          {/* Header rule */}
+          <div className={styles.headerRule} aria-hidden="true" />
 
-            <input
-              type="email"
-              name="email"
-              required
-              autoComplete="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="your email"
-              style={inputStyle}
-            />
-
-            <button
-              type="submit"
-              disabled={submitting}
-              style={{
-                width: "100%",
-                padding: "12px 16px",
-                fontFamily: "var(--font-mono), monospace",
-                fontSize: 13,
-                fontWeight: 500,
-                letterSpacing: "0.04em",
-                color: "var(--bg)",
-                background: "var(--ink)",
-                border: "none",
-                borderRadius: "var(--radius)",
-                cursor: submitting ? "default" : "pointer",
-                opacity: submitting ? 0.5 : 1,
-                transition: "opacity 0.2s ease",
-                marginTop: 4,
-              }}
+          {/* Form section / success state */}
+          {isSuccess ? (
+            <div className={styles.successSection}>
+              <p className={styles.successHeadline}>your place is kept.</p>
+              <p className={styles.successSub}>You will hear from us.</p>
+            </div>
+          ) : (
+            <form
+              onSubmit={handleSubmit}
+              noValidate
+              className={`${styles.formSection}${isFading ? ` ${styles.formSectionFading}` : ""}`}
             >
-              {submitting ? "..." : "Keep my place."}
-            </button>
+              <h1 className={styles.headline}>join the waitlist</h1>
 
-            {error && (
-              <p
-                style={{
-                  fontFamily: "var(--font-mono), monospace",
-                  fontSize: 12,
-                  color: "var(--ink-2)",
-                  margin: 0,
-                  textAlign: "center",
-                  letterSpacing: "0.01em",
-                }}
+              <input
+                ref={nameRef}
+                type="text"
+                name="name"
+                autoComplete="given-name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="your name"
+                disabled={isSubmitting}
+                className={`${styles.input} ${styles.nameInput}${shake ? ` ${styles.shake}` : ""}`}
+              />
+
+              <input
+                ref={emailRef}
+                type="email"
+                name="email"
+                autoComplete="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="your email"
+                disabled={isSubmitting}
+                className={`${styles.input} ${styles.emailInput}${shake ? ` ${styles.shake}` : ""}`}
+              />
+
+              {error && <p className={styles.error}>{error}</p>}
+
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className={styles.button}
               >
-                {error}
-              </p>
-            )}
-          </form>
-        )}
-      </div>
+                {isSubmitting ? "—" : "keep my place"}
+              </button>
+            </form>
+          )}
 
-      <style>{`
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(4px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-        input:focus {
-          border-color: var(--ink-2);
-        }
-      `}</style>
-    </main>
+          {/* Double rule */}
+          <div className={styles.doubleRule} aria-hidden="true">
+            <div className={styles.doubleRuleLine} />
+            <div className={styles.doubleRuleLine} />
+          </div>
+
+          {/* Content section */}
+          <section className={styles.contentSection}>
+            <p className={styles.tagline}>Some things deserve to be kept.</p>
+            <p className={styles.subtagline}>The private version of being known.</p>
+
+            <div className={styles.bodyCopy}>
+              <p>
+                There is a version of you that doesn&apos;t make it into conversation.
+                It lives in the drive home. In the gap between who you are
+                publicly and who you actually are.
+              </p>
+              <p>
+                Keeped is a daily journal. One prompt. Private by default.
+                Shared by choice. Be witnessed rather than watched.
+              </p>
+            </div>
+          </section>
+
+          {/* Footer rule */}
+          <div className={styles.footerRule} aria-hidden="true" />
+
+          {/* Footer */}
+          <footer className={styles.footer}>
+            <span className={styles.footerLeft}>KEEPED</span>
+            <span className={styles.footerCenter}>ref. 001 — march 2026</span>
+            <span className={styles.footerRight}>WAITLIST</span>
+          </footer>
+
+        </div>
+      </div>
+    </>
   );
 }

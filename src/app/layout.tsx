@@ -32,6 +32,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${ibmPlexMono.variable} ${sourceSans.variable}`}>
+      <head>
+        <link rel="stylesheet" href="https://use.typekit.net/ofj6pxz.css" />
+      </head>
       <body>{children}</body>
     </html>
   );
