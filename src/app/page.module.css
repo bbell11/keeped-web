@@ -137,7 +137,7 @@
 }
 
 .successHeadline {
-  font-family: 'adobe-handwriting', cursive;
+  font-family: 'adobe-handwriting-ernie', cursive;
   font-size: 32px;
   font-weight: 400;
   color: #2A2C38;
@@ -162,7 +162,7 @@
 /* ─── Headline ───────────────────────────────────────────────────── */
 
 .headline {
-  font-family: 'adobe-handwriting', cursive;
+  font-family: 'adobe-handwriting-ernie', cursive;
   font-size: 32px;
   font-weight: 400;
   color: #2A2C38;
