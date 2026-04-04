@@ -395,7 +395,7 @@
 
 @media (max-width: 639px) {
   .page {
-    padding: 0;
+    padding: 20px 16px;
     align-items: flex-start;
   }
 
