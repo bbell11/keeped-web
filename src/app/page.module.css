@@ -78,7 +78,7 @@
   width: 75px;
   height: 57px;
   /* Shift down so the logo straddles the header rule */
-  transform: translateY(28px);
+  transform: translateY(18px);
 }
 
 .headerRight {
@@ -420,7 +420,13 @@
   }
 
   .headerCenter {
-    display: none;
+    display: flex;
+  }
+
+  .logo {
+    width: 56px;
+    height: 43px;
+    transform: translateY(20px);
   }
 
   .headerRule {
