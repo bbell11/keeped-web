@@ -65,13 +65,20 @@
 }
 
 .headerCenter {
-  font-family: 'ibm-plex-mono', 'IBM Plex Mono', monospace;
-  font-size: 14px;
-  font-weight: 400;
-  text-transform: uppercase;
-  color: #8A8278;
-  text-align: center;
   flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+}
+
+.logo {
+  display: block;
+  width: 75px;
+  height: 57px;
+  /* Shift down so the logo straddles the header rule */
+  transform: translateY(28px);
 }
 
 .headerRight {

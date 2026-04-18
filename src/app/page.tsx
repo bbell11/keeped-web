@@ -85,7 +85,9 @@ export default function Home() {
           {/* Header */}
           <header className={styles.header}>
             <span className={styles.headerLeft}>KEEPED</span>
-            <span className={styles.headerCenter}>ref. 001 — march 2026</span>
+            <div className={styles.headerCenter}>
+              <img src="/logo.svg" alt="Keeped" className={styles.logo} />
+            </div>
             <span className={styles.headerRight}>WAITLIST</span>
           </header>
 
