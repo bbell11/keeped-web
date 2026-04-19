@@ -75,6 +75,9 @@ export default function Home() {
   const isFading = formState === "fading";
   const isSuccess = formState === "success";
 
+  const now = new Date();
+  const monthYear = now.toLocaleDateString("en-US", { month: "long", year: "numeric" }).toLowerCase();
+
   return (
     <>
       <div className={styles.background} aria-hidden="true" />
@@ -174,7 +177,7 @@ export default function Home() {
           {/* Footer */}
           <footer className={styles.footer}>
             <span className={styles.footerLeft}>KEEPED</span>
-            <span className={styles.footerCenter}>ref. 001 — march 2026</span>
+            <span className={styles.footerCenter}>{`ref. 001 — ${monthYear}`}</span>
             <span className={styles.footerRight}>WAITLIST</span>
           </footer>
 
